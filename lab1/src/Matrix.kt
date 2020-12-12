@@ -128,7 +128,7 @@ class Matrix(inputElements: Array<Array<Float>>) {
     }
 
     override fun hashCode(): Int {
-        return elements.contentDeepHashCode()
+        return elements.hashCode()
     }
 
     override fun toString(): String {
