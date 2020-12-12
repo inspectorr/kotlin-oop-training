@@ -13,7 +13,7 @@ class Phone(
     }
 }
 
-class Contact(
+data class Contact(
         var firstName: String,
         var lastName: String,
         private val phones: MutableList<Phone> = mutableListOf()
