@@ -1,7 +1,9 @@
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 
-class Matrix(private val elements: Array<Array<Float>>) {
+class Matrix(inputElements: Array<Array<Float>>) {
+    private val elements = inputElements.copyOf().map { arr -> arr.copyOf() }
+
     init {
         validate()
     }
