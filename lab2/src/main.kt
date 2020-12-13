@@ -7,19 +7,19 @@ interface Shape {
     val perimeter: Double
 }
 
-class Circle(private val radius: Double) : Shape {
+class Circle(val radius: Double) : Shape {
     override val area: Double get() = Math.PI * radius.pow(2.0)
     override val perimeter: Double get() = Math.PI * 2 * radius
 }
 
-open class Rect(private val width: Double, private val height: Double) : Shape {
+open class Rect(val width: Double, val height: Double) : Shape {
     override val area: Double get() = width * height
     override val perimeter: Double get() = 2 * (width + height)
 }
 
 class Square(size: Double) : Rect(size, size)
 
-class Triangle(private val a: Double, private val b: Double, private val c: Double) : Shape {
+class Triangle(val a: Double, val b: Double, val c: Double) : Shape {
     init {
         validate()
     }
