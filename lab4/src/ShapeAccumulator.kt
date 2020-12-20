@@ -26,4 +26,8 @@ class ShapeAccumulator {
 
     val totalPerimeter: Double
         get() = shapes.sumByDouble { el -> el.perimeter }
+
+    override fun toString(): String {
+        return shapes.toString()
+    }
 }
