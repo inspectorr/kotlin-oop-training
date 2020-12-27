@@ -13,4 +13,5 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "com.google.code.gson:gson:2.8.5"
     implementation "org.danilopianini:gson-extras:0.2.2"
+    implementation "no.tornado:tornadofx:1.7.20"
 }

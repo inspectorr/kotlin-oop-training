@@ -1,5 +1,5 @@
 class ShapeAccumulator {
-    private val shapes: MutableList<Shape> = mutableListOf()
+    val shapes: MutableList<Shape> = mutableListOf()
 
     fun add(shape: Shape) {
         shapes.add(shape)

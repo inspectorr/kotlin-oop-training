@@ -10,14 +10,18 @@ interface Shape {
 class Circle(val radius: Double) : Shape {
     override val area: Double get() = Math.PI * radius.pow(2.0)
     override val perimeter: Double get() = Math.PI * 2 * radius
+    override fun toString() = "Circle($radius)"
 }
 
 open class Rect(val width: Double, val height: Double) : Shape {
     override val area: Double get() = width * height
     override val perimeter: Double get() = 2 * (width + height)
+    override fun toString() = "Rect(${width}x${height})"
 }
 
-class Square(size: Double) : Rect(size, size)
+class Square(size: Double) : Rect(size, size) {
+    override fun toString() = "Square($width)"
+}
 
 class Triangle(val a: Double, val b: Double, val c: Double) : Shape {
     init {
@@ -37,6 +41,8 @@ class Triangle(val a: Double, val b: Double, val c: Double) : Shape {
         }
 
     override val perimeter: Double get() = a + b + c
+
+    override fun toString() = "Triangle($a, $b, $c)"
 }
 
 fun main() {
