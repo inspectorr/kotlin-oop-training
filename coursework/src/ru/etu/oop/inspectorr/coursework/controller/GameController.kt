@@ -6,6 +6,7 @@ import ru.etu.oop.inspectorr.coursework.view.GameView
 import tornadofx.Controller
 
 class GameController : Controller() {
+    val generation get() = game.configuration.generation
     val cellsWidthCount = 10
     val cellsHeightCount = 10
 

@@ -63,6 +63,8 @@ class Configuration(cells: Array<Array<Cell>>) : Matrix<Cell>(cells.map { it.clo
         return getCellNeighbours(y, x).count { it.isAlive }
     }
 
+    var generation = 0
+
     fun next() {
         val next = Configuration(width, height)
 
@@ -77,6 +79,7 @@ class Configuration(cells: Array<Array<Cell>>) : Matrix<Cell>(cells.map { it.clo
         }
 
         cells = next.cells
+        generation++
     }
 
     fun hash(): Int {
@@ -96,6 +99,7 @@ class Configuration(cells: Array<Array<Cell>>) : Matrix<Cell>(cells.map { it.clo
     }
 
     fun randomize() {
+        generation = 0
         iterate { _, _, cell ->
             cell.die()
             if (Random().nextBoolean()) cell.live()
@@ -103,6 +107,7 @@ class Configuration(cells: Array<Array<Cell>>) : Matrix<Cell>(cells.map { it.clo
     }
 
     fun clear() {
+        generation = 0
         iterate { _, _, cell ->
             cell.die()
         }

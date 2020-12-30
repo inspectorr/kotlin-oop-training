@@ -1,6 +1,7 @@
 package ru.etu.oop.inspectorr.coursework.view
 
 import javafx.animation.AnimationTimer
+import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.scene.canvas.Canvas
 import javafx.scene.control.Alert
@@ -15,8 +16,8 @@ class GameView : View("LIFE") {
         const val CANVAS_HEIGHT = 400.0
         const val SPACING = 5.0
         const val FRAMES_PER_SEC = 10
-        val CURSOR_FILL_COLOR = Color.SIENNA
-        val CURSOR_STROKE_COLOR = Color.BLUE
+        val CURSOR_FILL_COLOR = Color.color(1.0, 1.0, 1.0, 0.5)
+        val CURSOR_STROKE_COLOR = Color.BLUEVIOLET
         val ALIVE_CELL_COLOR = Color.WHITE
         val DEAD_CELL_COLOR = Color.BLACK
     }
@@ -25,10 +26,17 @@ class GameView : View("LIFE") {
 
     val canvas = Canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
     val gc get() = canvas.graphicsContext2D
+    val generationLabel = label()
 
     init {
+        init()
+    }
+
+    fun init() {
+        clearState()
         draw()
         initCanvasEvents()
+        updateGenerationText()
     }
 
     fun draw() {
@@ -77,6 +85,7 @@ class GameView : View("LIFE") {
         if (controller.hasNext) {
             controller.next()
             draw()
+            updateGenerationText()
         } else {
             onGameOver()
         }
@@ -86,15 +95,22 @@ class GameView : View("LIFE") {
         animation.stop()
         Alert(Alert.AlertType.CONFIRMATION).apply {
             title =  "GAME OVER"
-            contentText = "See how your last generation looks like!"
+            contentText = "Your generation score is ${controller.generation}! Check how your last generation looks like!"
             show()
+            onHidden = EventHandler {
+                init()
+            }
         }
-        controller.clear()
     }
 
     fun randomize() {
         controller.randomize()
         draw()
+        updateGenerationText()
+    }
+
+    fun updateGenerationText() {
+        generationLabel.text = "GENERATION: ${controller.generation}"
     }
 
     fun initCanvasEvents() {
@@ -128,7 +144,7 @@ class GameView : View("LIFE") {
 
     override val root = borderpane {
         top = canvas
-        bottom {
+        center {
             vbox(SPACING) {
                 padding = Insets(SPACING)
                 button("Start") {
@@ -161,6 +177,7 @@ class GameView : View("LIFE") {
                     }
                     useMaxWidth = true
                 }
+                add(generationLabel)
             }
         }
     }
