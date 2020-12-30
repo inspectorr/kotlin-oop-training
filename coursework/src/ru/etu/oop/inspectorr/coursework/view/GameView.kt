@@ -95,7 +95,7 @@ class GameView : View("LIFE") {
         animation.stop()
         Alert(Alert.AlertType.CONFIRMATION).apply {
             title =  "GAME OVER"
-            contentText = "Your generation score is ${controller.generation}! Check how your last generation looks like!"
+            contentText = "Your generation score is ${controller.generation}!"
             show()
             onHidden = EventHandler {
                 init()
@@ -140,6 +140,7 @@ class GameView : View("LIFE") {
     fun clearState() {
         controller.clear()
         draw()
+        updateGenerationText()
     }
 
     override val root = borderpane {
