@@ -5,6 +5,7 @@ import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.scene.canvas.Canvas
 import javafx.scene.control.Alert
+import javafx.scene.control.TextField
 import javafx.scene.input.MouseEvent
 import javafx.scene.paint.Color
 import ru.etu.oop.inspectorr.coursework.controller.GameController
@@ -16,9 +17,11 @@ class GameView : View("LIFE") {
         const val CANVAS_HEIGHT = 400.0
         const val SPACING = 5.0
         const val FRAMES_PER_SEC = 10
+        const val INPUT_WIDTH = 50.0
         val CURSOR_FILL_COLOR = Color.color(1.0, 1.0, 1.0, 0.5)
         val CURSOR_STROKE_COLOR = Color.BLUEVIOLET
-        val ALIVE_CELL_COLOR = Color.WHITE
+        val ALIVE_CELL_FILL_COLOR = Color.WHITE
+        val ALIVE_CELL_STROKE_COLOR = Color.BLACK
         val DEAD_CELL_COLOR = Color.BLACK
     }
 
@@ -34,7 +37,6 @@ class GameView : View("LIFE") {
 
     fun init() {
         clearState()
-        draw()
         initCanvasEvents()
         updateGenerationText()
     }
@@ -42,10 +44,14 @@ class GameView : View("LIFE") {
     fun draw() {
         gc.fill = DEAD_CELL_COLOR
         gc.fillRect(0.0, 0.0, canvas.width, canvas.height)
-        gc.fill = ALIVE_CELL_COLOR
+        gc.fill = ALIVE_CELL_FILL_COLOR
+        gc.stroke = ALIVE_CELL_STROKE_COLOR
         controller.apply {
             rectsToDraw { x, y ->
                 gc.fillRect(x, y, cellWidth, cellHeight)
+                if (cellWidth > 2 && cellHeight > 2) {
+                    gc.strokeRect(x, y, cellWidth, cellHeight)
+                }
             }
         }
     }
@@ -72,11 +78,13 @@ class GameView : View("LIFE") {
     var animating = false
 
     fun start() {
+        if (animating) return
         animating = true
         animation.start()
     }
 
     fun stop() {
+        if (!animating) return
         animating = false
         animation.stop()
     }
@@ -92,7 +100,7 @@ class GameView : View("LIFE") {
     }
 
     fun onGameOver() {
-        animation.stop()
+        stop()
         Alert(Alert.AlertType.CONFIRMATION).apply {
             title =  "GAME OVER"
             contentText = "Your generation score is ${controller.generation}!"
@@ -104,6 +112,7 @@ class GameView : View("LIFE") {
     }
 
     fun randomize() {
+        stop()
         controller.randomize()
         draw()
         updateGenerationText()
@@ -138,10 +147,20 @@ class GameView : View("LIFE") {
     }
 
     fun clearState() {
+        stop()
         controller.clear()
         draw()
         updateGenerationText()
     }
+
+    fun resetField() {
+        stop()
+        controller.resetFieldSize(widthTextField.text.toInt(), heightTextField.text.toInt())
+        init()
+    }
+
+    val widthTextField = TextField(controller.fieldWidth.toString()).apply { prefWidth = INPUT_WIDTH }
+    val heightTextField = TextField(controller.fieldHeight.toString()).apply { prefWidth = INPUT_WIDTH }
 
     override val root = borderpane {
         top = canvas
@@ -177,6 +196,17 @@ class GameView : View("LIFE") {
                         clearState()
                     }
                     useMaxWidth = true
+                }
+                hbox(SPACING) {
+                    add(widthTextField)
+                    label("X")
+                    add(heightTextField)
+                    button("Reset field") {
+                        action {
+                            resetField()
+                        }
+                        useMaxWidth = true
+                    }
                 }
                 add(generationLabel)
             }

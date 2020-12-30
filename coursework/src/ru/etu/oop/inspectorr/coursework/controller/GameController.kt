@@ -6,14 +6,26 @@ import ru.etu.oop.inspectorr.coursework.view.GameView
 import tornadofx.Controller
 
 class GameController : Controller() {
+    companion object {
+        const val DEFAULT_FIELD_WIDTH = 10
+        const val DEFAULT_FIELD_HEIGHT = 10
+    }
+
     val generation get() = game.configuration.generation
-    val cellsWidthCount = 10
-    val cellsHeightCount = 10
 
-    val game = Game(Configuration.randomize(cellsWidthCount, cellsHeightCount))
+    var fieldWidth = DEFAULT_FIELD_WIDTH
+    var fieldHeight = DEFAULT_FIELD_HEIGHT
 
-    val cellWidth: Double get() = GameView.CANVAS_WIDTH / cellsWidthCount
-    val cellHeight: Double get() = GameView.CANVAS_HEIGHT / cellsHeightCount
+    var game = Game(Configuration.randomize(fieldWidth, fieldHeight))
+
+    fun resetFieldSize(width: Int, height: Int) {
+        fieldWidth = width
+        fieldHeight = height
+        game.reset(width, height)
+    }
+
+    val cellWidth: Double get() = GameView.CANVAS_WIDTH / fieldWidth
+    val cellHeight: Double get() = GameView.CANVAS_HEIGHT / fieldHeight
 
     fun cell_X_ByCanvas_X(canvasX: Double): Int = (canvasX / cellWidth).toInt()
     fun cell_Y_ByCanvas_Y(canvasY: Double): Int = (canvasY / cellHeight).toInt()

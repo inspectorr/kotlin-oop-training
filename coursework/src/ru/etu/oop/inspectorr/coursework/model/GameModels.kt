@@ -139,4 +139,9 @@ class Game(var configuration: Configuration) {
         hashHistory.clear()
         configuration.randomize()
     }
+
+    fun reset(width: Int, height: Int) {
+        hashHistory.clear()
+        configuration = Configuration(width, height)
+    }
 }
