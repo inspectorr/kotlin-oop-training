@@ -1,14 +1,10 @@
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 
-class Matrix(inputElements: Array<Array<Float>>) {
-    private val elements = inputElements.copyOf().map { arr -> arr.copyOf() }
-
+open class Matrix<T>(open var elements: Array<Array<T>>) {
     init {
         validate()
     }
-
-    constructor(width: Int, height: Int): this(Array(height) { Array(width) { 0f } })
 
     private fun validate() {
         if (elements.isEmpty()) return
@@ -18,14 +14,6 @@ class Matrix(inputElements: Array<Array<Float>>) {
                 throw IllegalStateException()
             }
         }
-    }
-
-    operator fun get(i: Int, j: Int): Float {
-        return elements[i][j]
-    }
-
-    operator fun set(i: Int, j: Int, element: Float) {
-        elements[i][j] = element
     }
 
     val width: Int
@@ -39,67 +27,79 @@ class Matrix(inputElements: Array<Array<Float>>) {
             return elements.size
         }
 
-    private inline fun iterate(action: (i: Int, j: Int, element: Float) -> Unit) {
-        elements.forEachIndexed { i, floats ->
-            floats.forEachIndexed { j, element ->
-                action(i, j, element);
+    open operator fun get(i: Int, j: Int): T {
+        return elements[i][j]
+    }
+
+    open operator fun set(i: Int, j: Int, element: T) {
+        elements[i][j] = element
+    }
+
+    inline fun iterate(action: (i: Int, j: Int, element: T) -> Unit) {
+        elements.forEachIndexed { i, elements ->
+            elements.forEachIndexed { j, element ->
+                action(i, j, element)
             }
         }
     }
 
-    private inline fun iterateAssign(action: (i: Int, j: Int, element: Float) -> Float) {
+    inline fun iterateAssign(action: (i: Int, j: Int, element: T) -> T) {
         iterate { i, j, element -> this[i, j] = action(i, j, element) }
     }
 
-    private inline fun generateAssign(action: (i: Int, j: Int) -> Float): Matrix {
-        val result = Matrix(width, height)
-        result.iterateAssign { i, j, _ -> action(i, j) }
-        return result
-    }
-
-    private fun requireSameDimensions(matrix: Matrix) {
+    fun requireSameDimensions(matrix: Matrix<T>) {
         if (matrix.height != height || matrix.width != width) {
             throw IllegalArgumentException()
         }
     }
 
-    private fun requireSameOppositeDimensions(matrix: Matrix) {
+    fun requireSameOppositeDimensions(matrix: Matrix<T>) {
         if (width != matrix.height || height != matrix.width) {
             throw IllegalArgumentException()
         }
     }
 
-    private fun requireSquare() {
+    fun requireSquare() {
         if (width != height) {
             throw IllegalStateException()
         }
     }
+}
 
-    operator fun plus(matrix: Matrix): Matrix {
-        requireSameDimensions(matrix)
-        return generateAssign { i, j -> this[i, j] + matrix[i, j] }
+class FloatMatrix(elements: Array<Array<Float>>) : Matrix<Float>(elements.map { it.clone() }.toTypedArray()) {
+    constructor(width: Int, height: Int): this(Array(height) { Array(width) { 0f } })
+
+    private inline fun generateAssign(action: (i: Int, j: Int) -> Float): FloatMatrix {
+        val result = FloatMatrix(width, height)
+        result.iterateAssign { i, j, _ -> action(i, j) }
+        return result
+    }
+    
+    operator fun plus(floatMatrix: FloatMatrix): FloatMatrix {
+        requireSameDimensions(floatMatrix)
+        return generateAssign { i, j -> this[i, j] + floatMatrix[i, j] }
     }
 
-    operator fun minus(matrix: Matrix): Matrix {
-        requireSameDimensions(matrix)
-        return generateAssign { i, j -> this[i, j] - matrix[i, j] }
+    operator fun minus(floatMatrix: FloatMatrix): FloatMatrix {
+        requireSameDimensions(floatMatrix)
+        return generateAssign { i, j -> this[i, j] - floatMatrix[i, j] }
     }
 
-    operator fun times(number: Float): Matrix {
+    operator fun times(number: Float): FloatMatrix {
         return generateAssign { i, j -> this[i, j] * number }
     }
 
-    operator fun times(matrix: Matrix): Matrix {
-        requireSameOppositeDimensions(matrix)
-        return generateAssign { i, j -> this[i, j] + matrix[j, i] }
+    operator fun times(floatMatrix: FloatMatrix): FloatMatrix {
+        requireSameOppositeDimensions(floatMatrix)
+        return generateAssign { i, j -> this[i, j] + floatMatrix[j, i] }
     }
 
     val determinator: Float
         get() {
             requireSquare()
 
-            val l = Matrix(width, height)
-            val u = Matrix(width, height)
+            val l = FloatMatrix(width, height)
+            val u = FloatMatrix(width, height)
 
             iterate { i, _, _ -> l[i, i] = 1f }
 
@@ -122,8 +122,8 @@ class Matrix(inputElements: Array<Array<Float>>) {
             return detL * detU
         }
 
-    override operator fun equals(other: Any?): Boolean {
-        if (other !is Matrix) return false
+    override fun equals(other: Any?): Boolean {
+        if (other !is FloatMatrix) return false
         return hashCode() == other.hashCode()
     }
 
