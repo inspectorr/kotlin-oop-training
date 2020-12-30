@@ -4,6 +4,7 @@ import javafx.animation.AnimationTimer
 import javafx.geometry.Insets
 import javafx.scene.canvas.Canvas
 import javafx.scene.control.Alert
+import javafx.scene.input.MouseEvent
 import javafx.scene.paint.Color
 import ru.etu.oop.inspectorr.coursework.controller.GameController
 import tornadofx.*
@@ -14,6 +15,10 @@ class GameView : View("LIFE") {
         const val CANVAS_HEIGHT = 400.0
         const val SPACING = 5.0
         const val FRAMES_PER_SEC = 10
+        val CURSOR_FILL_COLOR = Color.SIENNA
+        val CURSOR_STROKE_COLOR = Color.BLUE
+        val ALIVE_CELL_COLOR = Color.WHITE
+        val DEAD_CELL_COLOR = Color.BLACK
     }
 
     val controller: GameController by inject()
@@ -21,14 +26,28 @@ class GameView : View("LIFE") {
     val canvas = Canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
     val gc get() = canvas.graphicsContext2D
 
+    init {
+        draw()
+        initCanvasEvents()
+    }
+
     fun draw() {
-        gc.fill = Color.BLACK
+        gc.fill = DEAD_CELL_COLOR
         gc.fillRect(0.0, 0.0, canvas.width, canvas.height)
-        gc.fill = Color.WHITE
+        gc.fill = ALIVE_CELL_COLOR
         controller.apply {
             rectsToDraw { x, y ->
                 gc.fillRect(x, y, cellWidth, cellHeight)
             }
+        }
+    }
+
+    fun drawCursor(x: Double, y: Double) {
+        controller.apply {
+            gc.fill = CURSOR_FILL_COLOR
+            gc.fillRect(flipX(x), flipY(y), cellHeight, cellHeight)
+            gc.stroke = CURSOR_STROKE_COLOR
+            gc.strokeRect(flipX(x), flipY(y), cellHeight, cellHeight)
         }
     }
 
@@ -42,11 +61,15 @@ class GameView : View("LIFE") {
         }
     }
 
+    var animating = false
+
     fun start() {
+        animating = true
         animation.start()
     }
 
     fun stop() {
+        animating = false
         animation.stop()
     }
 
@@ -61,11 +84,12 @@ class GameView : View("LIFE") {
 
     fun onGameOver() {
         animation.stop()
-        Alert(Alert.AlertType.INFORMATION).apply {
+        Alert(Alert.AlertType.CONFIRMATION).apply {
             title =  "GAME OVER"
             contentText = "See how your last generation looks like!"
             show()
         }
+        controller.clear()
     }
 
     fun randomize() {
@@ -73,7 +97,32 @@ class GameView : View("LIFE") {
         draw()
     }
 
-    init {
+    fun initCanvasEvents() {
+        canvas.apply {
+            addEventHandler(MouseEvent.MOUSE_DRAGGED) {e ->
+                controller.aliveCell(e.x, e.y)
+                draw()
+                drawCursor(e.x, e.y)
+            }
+            addEventHandler(MouseEvent.MOUSE_CLICKED) {e ->
+                controller.aliveCell(e.x, e.y)
+                draw()
+                drawCursor(e.x, e.y)
+            }
+            addEventHandler(MouseEvent.MOUSE_MOVED) {e ->
+                if (!animating) {
+                    draw()
+                    drawCursor(e.x, e.y)
+                }
+            }
+            addEventHandler(MouseEvent.MOUSE_EXITED) {
+                draw()
+            }
+        }
+    }
+
+    fun clearState() {
+        controller.clear()
         draw()
     }
 
@@ -103,6 +152,12 @@ class GameView : View("LIFE") {
                 button("Randomize") {
                     action {
                         randomize()
+                    }
+                    useMaxWidth = true
+                }
+                button("Clear") {
+                    action {
+                        clearState()
                     }
                     useMaxWidth = true
                 }

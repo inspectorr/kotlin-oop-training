@@ -12,8 +12,8 @@ enum class CellState {
 
 class Cell(var state: CellState = CellState.DEAD) {
     val isAlive: Boolean get() = state == CellState.ALIVE
-    fun live() { state = CellState.ALIVE }
-    fun die() { state = CellState.DEAD }
+    fun live() { if (!isAlive) state = CellState.ALIVE }
+    fun die() { if (isAlive) state = CellState.DEAD }
     companion object {
         fun willLive(cell: Cell, aliveNeighbours: Int): Boolean {
             return !cell.isAlive && aliveNeighbours == 3 || cell.isAlive && aliveNeighbours in 2..3
@@ -102,6 +102,12 @@ class Configuration(cells: Array<Array<Cell>>) : Matrix<Cell>(cells.map { it.clo
         }
     }
 
+    fun clear() {
+        iterate { _, _, cell ->
+            cell.die()
+        }
+    }
+
     companion object {
         fun randomize(width: Int, height: Int): Configuration {
             return Configuration(width, height).apply { randomize() }
@@ -117,5 +123,15 @@ class Game(var configuration: Configuration) {
     fun next() {
         hashHistory.add(configuration.hash())
         configuration.next()
+    }
+
+    fun clear() {
+        hashHistory.clear()
+        configuration.clear()
+    }
+
+    fun randomize() {
+        hashHistory.clear()
+        configuration.randomize()
     }
 }
